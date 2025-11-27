@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Newsletter subscribers collection
+    match /subscribers/{subscriberId} {
+      // Anyone can create a subscription
+      allow create: if request.resource.data.keys().hasAll(['email', 'subscribedAt']) &&
+                       request.resource.data.email is string &&
+                       request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
+      // Allow read for everyone (admin dashboard needs this)
+      allow read: if true;
+      // Allow update/delete for everyone (you can restrict this further with authentication)
+      allow update, delete: if true;
+    }
+
+    // Comments collection
+    match /comments/{commentId} {
+      // Anyone can read approved comments
+      allow read: if true;
+
+      // Anyone can create a comment with required fields (including optional email, isAdmin, parentId, and mentionedUser)
+      allow create: if request.resource.data.keys().hasAll(['postSlug', 'author', 'content', 'createdAt', 'approved']) &&
+                       request.resource.data.author is string &&
+                       request.resource.data.author.size() > 0 &&
+                       request.resource.data.author.size() <= 100 &&
+                       request.resource.data.content is string &&
+                       request.resource.data.content.size() > 0 &&
+                       request.resource.data.content.size() <= 2000 &&
+                       request.resource.data.approved is bool &&
+                       (!request.resource.data.keys().hasAny(['email']) ||
+                        (request.resource.data.email is string &&
+                         request.resource.data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'))) &&
+                       (!request.resource.data.keys().hasAny(['isAdmin']) ||
+                        request.resource.data.isAdmin is bool) &&
+                       (!request.resource.data.keys().hasAny(['parentId']) ||
+                        request.resource.data.parentId is string) &&
+                       (!request.resource.data.keys().hasAny(['mentionedUser']) ||
+                        (request.resource.data.mentionedUser is string &&
+                         request.resource.data.mentionedUser.size() > 0 &&
+                         request.resource.data.mentionedUser.size() <= 100));
+
+      // Allow update/delete for everyone (admin dashboard needs this)
+      allow update, delete: if true;
+    }
+  }
+}

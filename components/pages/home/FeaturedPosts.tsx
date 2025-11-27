@@ -61,21 +61,14 @@ export function FeaturedPosts() {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="grid gap-8 md:grid-cols-3">
       {posts.map((post) => (
         <BlogPostCard
           key={post.id}
           id={post.id}
           title={post.title}
           slug={post.slug}
-          excerpt={post.excerpt}
-          date={post.date}
-          author={post.author}
-          tags={post.tags}
           image={post.image}
-          content={post.content}
-          titleSize="small"
-          showFullDate={false}
         />
       ))}
     </div>

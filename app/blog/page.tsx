@@ -7,25 +7,25 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ""
 export const runtime = 'edge'
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Explore my latest blog posts featuring unfiltered thoughts, random musings, and authentic perspectives on life and technology.",
-  keywords: ["blog", "posts", "articles", "unfiltered thoughts", "personal musings", "tech insights"],
+  title: "Recipes",
+  description: "Explore our collection of delicious and easy-to-follow food recipes.",
+  keywords: ["recipes", "food", "cooking", "meals", "breakfast", "lunch", "dinner", "dessert"],
   openGraph: {
-    title: "Blog - Unfiltered Thoughts & Musings",
-    description: "Explore my latest blog posts featuring unfiltered thoughts and random musings.",
+    title: "Recipes - The Cook Book",
+    description: "Explore our collection of delicious recipes.",
     url: `${siteUrl}/blog`,
     type: "website",
     images: [{
       url: `${siteUrl}/og-image.svg`,
       width: 1200,
       height: 630,
-      alt: "Your Blog Name Blog",
+      alt: "The Cook Book Recipes",
     }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog - Unfiltered Thoughts & Musings",
-    description: "Explore my latest blog posts",
+    title: "Recipes - The Cook Book",
+    description: "Explore our collection of delicious recipes",
     images: [`${siteUrl}/og-image.svg`],
   },
   alternates: {
@@ -33,6 +33,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function BlogPage() {
-  return <BlogListServer />
+interface PageProps {
+  searchParams: Promise<{ category?: string }>
+}
+
+export default async function BlogPage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const category = params.category
+
+  return <BlogListServer category={category} />
 }

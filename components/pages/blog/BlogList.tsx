@@ -97,20 +97,14 @@ export function BlogList() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-16">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
               <BlogPostCard
                 key={post.id}
                 id={post.id}
                 title={post.title}
                 slug={post.slug}
-                excerpt={post.excerpt}
-                date={post.date}
-                author={post.author}
-                tags={post.tags}
                 image={post.image}
-                titleSize="medium"
-                showFullDate={true}
               />
             ))}
           </div>

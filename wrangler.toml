@@ -1,0 +1,9 @@
+name = "yourblog"
+compatibility_date = "2025-01-11"
+pages_build_output_dir = ".vercel/output/static"
+
+# 👇 Add the compatibility_flags array
+compatibility_flags = ["nodejs_compat"]
+
+# Note: GITHUB_TOKEN and ADMIN_PASSWORD should be set in Cloudflare Pages dashboard
+# as secrets, not in this configuration file. This is a security best practice.

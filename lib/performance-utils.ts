@@ -3,7 +3,7 @@
  * Web Vitals monitoring, code splitting hints, and performance enhancements
  */
 
-import { useCallback, useRef, useEffect } from 'react'
+import React, { useCallback, useRef, useEffect } from 'react'
 
 /**
  * Custom hook to measure component render performance
@@ -89,24 +89,27 @@ export function useIntersection(
 	element: React.RefObject<HTMLElement>,
 	options?: IntersectionObserverInit
 ) {
-	const [isVisible, setIsVisible] = React.useState(false)
+	const isVisible = useRef(false)
+	const observerRef = useRef<IntersectionObserver | null>(null)
 
-	React.useEffect(() => {
-		const observer = new IntersectionObserver(([entry]) => {
+	useEffect(() => {
+		observerRef.current = new IntersectionObserver(([entry]) => {
 			if (entry.isIntersecting) {
-				setIsVisible(true)
-				observer.unobserve(entry.target)
+				isVisible.current = true
+				if (observerRef.current) {
+					observerRef.current.unobserve(entry.target)
+				}
 			}
 		}, options)
 
 		if (element.current) {
-			observer.observe(element.current)
+			observerRef.current.observe(element.current)
 		}
 
-		return () => observer.disconnect()
+		return () => observerRef.current?.disconnect()
 	}, [element, options])
 
-	return isVisible
+	return isVisible.current
 }
 
 /**
@@ -124,28 +127,47 @@ export function reportWebVitals(callback: (vitals: Partial<WebVitals>) => void) 
 	if (typeof window === 'undefined') return
 
 	try {
-		// Use Web Vitals if available
-		import('web-vitals').then(({ getCLS, getFID, getLCP, getFCP }) => {
-			getCLS(callback)
-			getFID(callback)
-			getLCP(callback)
-			getFCP(callback)
+		// Use Web Vitals if available (optional dependency)
+		Promise.resolve().then(() => {
+			// Attempt to load web-vitals dynamically
+			// This is optional, so we don't fail if it's not available
+			try {
+				// @ts-ignore - web-vitals is optional
+				import('web-vitals')
+					.then((module: any) => {
+						const { getCLS, getFID, getLCP, getFCP } = module
+						getCLS(callback)
+						getFID(callback)
+						getLCP(callback)
+						getFCP(callback)
+					})
+					.catch(() => {
+						// web-vitals not available, use fallback
+						reportWebVitalsFallback(callback)
+					})
+			} catch {
+				reportWebVitalsFallback(callback)
+			}
 		})
 	} catch {
-		// Fallback: report basic metrics
-		if ('PerformanceObserver' in window) {
-			const observer = new PerformanceObserver((list) => {
-				const entries = list.getEntries()
-				entries.forEach((entry) => {
-					callback({ [entry.name]: entry.duration } as Partial<WebVitals>)
-				})
-			})
+		reportWebVitalsFallback(callback)
+	}
+}
 
-			try {
-				observer.observe({ entryTypes: ['measure', 'navigation'] })
-			} catch {
-				// Browser doesn't support this entry type
-			}
+function reportWebVitalsFallback(callback: (vitals: Partial<WebVitals>) => void) {
+	// Fallback: report basic metrics
+	if ('PerformanceObserver' in window) {
+		const observer = new PerformanceObserver((list) => {
+			const entries = list.getEntries()
+			entries.forEach((entry) => {
+				callback({ [entry.name]: entry.duration } as Partial<WebVitals>)
+			})
+		})
+
+		try {
+			observer.observe({ entryTypes: ['measure', 'navigation'] })
+		} catch {
+			// Browser doesn't support this entry type
 		}
 	}
 }

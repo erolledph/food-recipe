@@ -5,7 +5,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Recipe } from '@/hooks/useRecipes'
+import { Recipe } from '@/lib/types'
 import { Badge, Button } from '@/components/ui'
 
 interface RecipeCardProps {

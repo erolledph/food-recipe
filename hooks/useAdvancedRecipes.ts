@@ -59,7 +59,7 @@ export function useRecipes(initialRecipes: Recipe[] = []) {
 	useEffect(() => {
 		if (initialized.current) return
 
-		const favorites = new Set(
+		const favorites = new Set<string>(
 			JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITES) || '[]')
 		)
 		const cookingHistory = JSON.parse(localStorage.getItem(STORAGE_KEYS.COOKING_HISTORY) || '{}')
